@@ -5,6 +5,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Random;
+
 public class PlayerServiceTest {
     private PlayerService playerService;
 
@@ -157,4 +159,35 @@ public class PlayerServiceTest {
         }
     }
 
+    @Test
+    public void comparePlayerServiceImplementations() {
+        PlayerService playerService1 = new PlayerServiceImpl();
+        PlayerService playerService2 = new PlayerServiceRandomTreeImpl();
+
+        long start = System.nanoTime();
+        testPerformance(playerService1);
+        long time1 = System.nanoTime() - start;
+
+        start = System.nanoTime();
+        testPerformance(playerService2);
+        long time2 = System.nanoTime() - start;
+        
+        System.err.println("Simple implementation's time: " + time1/1e9 + "s"
+                + " Random Tree implementation's time: " + time2/1e9 + "s");
+    }
+
+    private void testPerformance(PlayerService playerService) {
+        int numberOfOpponents = 100000;
+        Random generator = new Random();
+
+        for (int i = 0; i < numberOfOpponents; i++) {
+            double playerRate = generator.nextDouble();
+            playerService.registerReadyPlayer(new Player("Nickname", playerRate));
+        }
+
+        Player player = new Player("Nickname", generator.nextDouble());
+        for (int i = 0; i < numberOfOpponents; i++) {
+            playerService.findOpponent(player);
+        }
+    }
 }
